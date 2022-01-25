@@ -9,8 +9,6 @@ export function sendNewsletter(req, res) {
 
 
     // sample notification payload
-/*
-
     const notificationPayload = {
         "notification": {
             "title": "Angular News",
@@ -18,7 +16,7 @@ export function sendNewsletter(req, res) {
             "icon": "assets/main-page-logo-small-hat.png",
             "vibrate": [100, 50, 100],
             "data": {
-                "dateOfArrival": 1515496004613,
+                "dateOfArrival": Date.now(),
                 "primaryKey": 1
             },
             "actions": [{
@@ -28,10 +26,12 @@ export function sendNewsletter(req, res) {
         }
     };
 
+    Promise.all( USER_SUBSCRIPTIONS.map(sub => webpush.sendNotification(sub, JSON.stringify(notificationPayload) )))
+        .then(() => res.status(200).json({message: 'Newsletter sent successfully.'}))
+        .catch(err => {
+            console.error("Error sending notification, reason: ", err);
+            res.sendStatus(500);
+        });
 
-    */
-
-    //TODO
-
-}
+  }
 
