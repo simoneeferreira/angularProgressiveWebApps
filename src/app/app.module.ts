@@ -8,20 +8,14 @@ import {LessonsComponent} from './lessons/lessons.component';
 import {LessonsService} from "./services/lessons.service";
 import {ReactiveFormsModule} from "@angular/forms";
 
-import {environment} from '../environments/environment.prod';
+import {environment} from '../environments/environment';
 import {ServiceWorkerModule} from '@angular/service-worker';
 
 
-
-
-
-
-
-
-
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {AppRoutingModule} from "./app-routing.module";
-import {NewsletterService} from "./services/newsletter.service";
+import {RouterModule} from '@angular/router';
+import {routesConfig} from './routes.config';
+
 
 
 
@@ -32,17 +26,13 @@ import {NewsletterService} from "./services/newsletter.service";
         LessonsComponent
     ],
     imports: [
-        BrowserModule.withServerTransition({ appId: 'serverApp' }),
+        BrowserModule,
         HttpClientModule,
-        BrowserAnimationsModule,
-        AppRoutingModule,
-        ReactiveFormsModule,
-        ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
-
+        RouterModule.forRoot(routesConfig),
+        ReactiveFormsModule
     ],
     providers: [
-        LessonsService,
-        NewsletterService
+        LessonsService
     ],
     bootstrap: [AppComponent]
 })

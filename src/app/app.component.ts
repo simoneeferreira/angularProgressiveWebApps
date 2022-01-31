@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {SwPush, SwUpdate} from "@angular/service-worker";
-
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-root',
@@ -10,27 +9,14 @@ import {SwPush, SwUpdate} from "@angular/service-worker";
 export class AppComponent  implements OnInit {
 
 
-    constructor(private swUpdate: SwUpdate) {
+    constructor() {
 
     }
 
     ngOnInit() {
 
-        if (this.swUpdate.isEnabled) {
-
-            this.swUpdate.available.subscribe(() => {
-
-                if (confirm("New version available. Load New Version?")) {
-                    window.location.reload();
-                }
-
-            });
-
-        }
-
-
-
     }
+
 
 }
 
