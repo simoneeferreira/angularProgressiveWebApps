@@ -1,5 +1,5 @@
 
-const VERSION = 'v8';
+const VERSION = 'v17';
 
 
 log('Installing Service Worker');
@@ -12,61 +12,75 @@ async function installServiceWorker() {
 
     log("Service Worker installation started ");
 
-    const request = new Request('offline.html');
+    const cache = await caches.open(getCacheName());
 
-    const response = await fetch(request);
+    self.skipWaiting();
 
-    log("response received after loading offline.html", response);
-
-    if (response.status !== 200) {
-        throw new Error('Could not load offline page!');
-    }
-
-    const cache = await caches.open('app-cache');
-
-    cache.put(request, response);
-
-    log("Cached offline.html");
+    return cache.addAll([
+        '/',
+        '/polyfills.bundle.js',
+        '/inline.bundle.js',
+        '/styles.bundle.js',
+        '/vendor.bundle.js',
+        '/main.bundle.js',
+        '/assets/bundle.css',
+        '/assets/angular-pwa-course.png',
+        '/assets/main-page-logo-small-hat.png'
+    ]);
 
 }
 
-self.addEventListener('activate', () => {
-
-    log('version is activated');
-
-});
+self.addEventListener('activate', () => activateSW());
 
 
-self.addEventListener('fetch', event => event.respondWith(showOfflineIfError(event)));
+async function activateSW() {
+
+    log('Service Worker activated');
+
+    const cacheKeys = await caches.keys();
+
+    cacheKeys.forEach(cacheKey => {
+        if (cacheKey !== getCacheName() ) {
+            caches.delete(cacheKey);
+        }
+    });
+
+    return clients.claim();
+}
 
 
-async function showOfflineIfError(event) {
+self.addEventListener('fetch', event => event.respondWith(cacheThenNetwork(event)));
 
 
-    let response;
 
-    try {
+async function cacheThenNetwork(event) {
 
-         log('Calling network: ' + event.request.url);
+    log('Intercepting request: ' + event.request.url);
 
-         response = await fetch(event.request);
+    const cache = await caches.open(getCacheName());
 
+    const cachedResponse = await cache.match(event.request);
+
+    if (cachedResponse) {
+        log('From Cache: ' + event.request.url);
+        return cachedResponse;
     }
-    catch(err) {
 
-        log( 'Network request Failed. Serving offline page ', err );
+    const networkResponse = await fetch(event.request);
 
-        const cache = await caches.open('app-cache');
+    log('Calling network: ' + event.request.url);
 
-        response = cache.match("offline.html");
+    return networkResponse;
 
-    }
 
-    return response;
 }
 
 
 
+
+function getCacheName() {
+    return "app-cache-" + VERSION;
+}
 
 
 function log(message, ...data) {
@@ -74,7 +88,7 @@ function log(message, ...data) {
         console.log(VERSION, message, data);
     }
     else {
-        console.log(message);
+        console.log(VERSION, message);
     }
 }
 
